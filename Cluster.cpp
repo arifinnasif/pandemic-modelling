@@ -5,7 +5,8 @@
 #define SPREADRATE 1
 #define SPREADRATE_TOL 0.25
 
-int total_death;
+using namespace std;
+
 
 class Cluster
 {
@@ -13,6 +14,7 @@ class Cluster
     int infected;
     int recovered;
     int death;
+    int deathToll;
 
 public:
     Cluster();
@@ -24,6 +26,7 @@ public:
     int getPopulation();
     int getInfected();
     int getRecovered();
+    int getDeathToday();
     int getDeathToll();
     Person getMemberAt(int id);
 };
@@ -33,6 +36,7 @@ Cluster::Cluster()
     infected=0;
     recovered=0;
     death=0;
+    deathToll=0;
 }
 
 Cluster::Cluster(int num)
@@ -40,6 +44,7 @@ Cluster::Cluster(int num)
     infected=0;
     recovered=0;
     death=0;
+    deathToll=0;
     Person temp;
     for(int i=0;i<num;i++)
         member.push_back(temp);
@@ -82,7 +87,7 @@ int Cluster::getDeathToday()
 
 int Cluster::getDeathToll()
 {
-    return total_death;
+    return deathToll;
 }
 
 void Cluster::update()
@@ -115,7 +120,7 @@ void Cluster::update()
         }
     }
     for(int i=0;i<mourge.size();i++) member.erase(member.begin()+mourge[i]-i);
-    total_death+=mourge.size();
+    deathToll+=mourge.size();
 }
 
 void Cluster::init(int id)
