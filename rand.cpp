@@ -15,5 +15,10 @@ int randint(int start, int end)
 double randnormal(double value, double dev)
 {
     std::normal_distribution<double> dist(value, dev);
-    return abs(dist(generator));
+    double ret;
+    do
+    {
+        ret=abs(dist(generator));
+    }while(ret<0);
+    return ret;
 }
