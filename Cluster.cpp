@@ -5,6 +5,10 @@
 #define SPREADRATE 1
 #define SPREADRATE_TOL 0.25
 
+#define DEATHRATE_HPT 2
+#define TREATMENT_QUALITY 0.5
+//TREATMENT_QUALITY should be less than 1
+
 using namespace std;
 
 
@@ -28,6 +32,7 @@ public:
     int getRecovered();
     int getDeathToday();
     int getDeathToll();
+    vector<Person> & getMember();
     Person getMemberAt(int id);
 };
 
@@ -130,7 +135,91 @@ void Cluster::init(int id)
     ++infected;
 }
 
+vector<Person> & Cluster::getMember()
+{
+    return member;
+}
+
 Person Cluster::getMemberAt(int id)
 {
     return member[id];
 }
+
+
+class Hospital
+{
+    vector<Person> member;
+    vector<State> outcome;
+    vector<Cluster *> location;
+    int capacity;
+
+    void release(int id)
+    {
+        location[id]->getMember().push_back(member[id]);
+        member.erase(member.begin()+id);
+        outcome.erase(outcome.begin()+id);
+        location.erase(location.begin()+id);
+    }
+
+public:
+    Hospital(int cap)
+    {
+        capacity=cap;
+    }
+
+    void addMember(Cluster &c, int id)
+    {
+        if(member.size()>=capacity) {std::cout<<"Hospital is full!"<<std::endl; return;}
+        member.push_back(c.getMemberAt(id));
+        location.push_back(&c);
+        if(DEATHRATE_HPT*100>=randint(1,10000))
+        {
+            outcome.push_back(DEAD);
+            member.end()->setRecoveryPeriod(c.getMemberAt(id).getRecoveryPeriod()*2);
+        }
+        else
+        {
+            outcome.push_back(RECOVERED);
+            member.end()->setRecoveryPeriod(member.end()->getRecoveryPeriod()-(member.end()->getRecoveryPeriod()-member.end()->getDays())*TREATMENT_QUALITY);
+        }
+        c.getMember().erase(c.getMember().begin()+id);
+    }
+
+    void update()
+    {
+        vector<int> mourge, healed;
+        for(int i=0;i<member.size();i++)
+        {
+            if(member[i].increaseDays2())
+            {
+                if(outcome==DEAD)
+                {
+                    member[i].kill();
+                    mourge.push_back(i);
+                }
+                else if(outcome==RECOVERED)
+                {
+                    member[i].recover();
+                }
+            }
+        }
+
+        for(int i=0;i<mourge.size();i++)
+        {
+            member.erase(member.begin()+mourge[i]-i);
+            location.erase(location.begin()+mourge[i]-i);
+            outcome.erase(outcome.begin()+mourge[i]-i);
+        }
+
+        for(int i=0;i<member.size();i++)
+        {
+            if(member[i].getHealth()==RECOVERED) healed.push_back(i);
+        }
+
+        for(int i=0;i<healed.size();i++)
+        {
+            release(healed[i]-i);
+        }
+    }
+
+};
