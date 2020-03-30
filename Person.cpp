@@ -20,8 +20,12 @@ class Person
 public:
     Person();
     void increaseDays();
+    int increaseDays2();
     void infect();
     void infect(Person &p);
+    void setRecoveryPeriod(int d);
+    int getRecoveryPeriod();
+    int getDays() {return days;}
     State getHealth();
 };
 
@@ -31,12 +35,18 @@ Person::Person()
     health=HEALTHY;
 }
 
+int Person::increaseDays2()
+{
+    ++days;
+    return days>=recoveryPeriod;
+}
+
 void Person::increaseDays()
 {
     if(health==INFECTED)
     {
-        ++days;
-        if(days>=recoveryPeriod)
+        
+        if(increaseDays2())
         {
             if(DEATHRATE*100 >= randint(1,10000)) kill();
             else recover();
@@ -78,4 +88,14 @@ void Person::recover()
 State Person::getHealth()
 {
     return health;
+}
+
+void Person::setRecoveryPeriod(int d)
+{
+    recoveryPeriod=d;
+}
+
+int Person::getRecoveryPeriod()
+{
+    return recoveryPeriod;
 }
