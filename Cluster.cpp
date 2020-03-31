@@ -5,6 +5,11 @@
 #define SPREADRATE 1
 #define SPREADRATE_TOL 0.25
 
+#define DEATHRATE_HPT 2.0
+//DEATHRATE_HPT should be a double
+#define TREATMENT_QUALITY 0.5
+//TREATMENT_QUALITY should be less than 1
+
 using namespace std;
 
 
@@ -28,6 +33,7 @@ public:
     int getRecovered();
     int getDeathToday();
     int getDeathToll();
+    vector<Person> & getMember();
     Person getMemberAt(int id);
 };
 
@@ -130,7 +136,79 @@ void Cluster::init(int id)
     ++infected;
 }
 
+vector<Person> & Cluster::getMember()
+{
+    return member;
+}
+
 Person Cluster::getMemberAt(int id)
 {
     return member[id];
 }
+
+
+class Hospital
+{
+    vector<Person> member;
+    vector<Cluster *> location;
+    int capacity;
+
+    void release(int id)
+    {
+        location[id]->getMember().push_back(member[id]);
+        member.erase(member.begin()+id);
+        location.erase(location.begin()+id);
+    }
+
+public:
+    Hospital(int cap)
+    {
+        capacity=cap;
+    }
+
+    void addMember(Cluster &c, int id)
+    {
+        if(member.size()>=capacity) {std::cout<<"Hospital is full!"<<std::endl; return;}
+        Person temp=c.getMemberAt(id);
+        if(temp.getFate()==DEAD)
+        {
+            if(100.0*(1-DEATHRATE_HPT/DEATHRATE)*100>=randint(1,10000)) temp.setFate(RECOVERED);
+        }
+
+        if(temp.getFate==RECOVERED)
+        {
+            temp.setRecoveryPeriod(temp.getRecoveryPeriod()-(temp.getRecoveryPeriod()-temp.getDays())*TREATMENT_QUALITY);
+        }
+        else if(temp.getFate()==RECOVERED)
+        {
+            temp.setRecoveryPeriod(temp.getRecoveryPeriod()*2);
+        }
+
+        member.push_back(temp);
+        location.push_back(&c);
+        c.getMember().erase(c.getMember().begin()+id);
+    }
+
+    void update()
+    {
+        vector<int> rel;
+        for(int i=0;i<member.size();i++)
+        {
+            member[i].increaseDays();
+            if(member[i].getHealth()==DEAD||member[i].getHealth()==RECOVERED) rel.push_back(i); 
+        }
+
+
+        for(int i=0;i<rel.size();i++)
+        {
+            if(member[rel[i]].getHealth==RECOVERED)
+            {
+                location[rel[i]]->getMember().push_back(member[rel[i]]);
+            }
+
+            location.erase(location.begin()+rel[i]-i);
+            member.erase(member.begin()+rel[i]-i);
+        }
+    }
+
+};
