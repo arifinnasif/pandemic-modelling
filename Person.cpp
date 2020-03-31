@@ -13,8 +13,6 @@ class Person
     int recoveryPeriod;
     State health;
 
-    void recover();
-    void kill();
 
 
 public:
@@ -23,6 +21,8 @@ public:
     int increaseDays2();
     void infect();
     void infect(Person &p);
+    void recover();
+    void kill();
     void setRecoveryPeriod(int d);
     int getRecoveryPeriod();
     int getDays() {return days;}
