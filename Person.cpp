@@ -1,7 +1,8 @@
 #include <iostream>
 #include "rand.cpp"
 
-#define DEATHRATE 10
+#define DEATHRATE 10.0
+//DEATHRATE should be a double
 #define RECOVERY 34
 #define RECOVERY_TOL 3
 
@@ -12,6 +13,7 @@ class Person
     int days;
     int recoveryPeriod;
     State health;
+    State fate;
 
 
 
@@ -27,12 +29,15 @@ public:
     int getRecoveryPeriod();
     int getDays() {return days;}
     State getHealth();
+    State getFate() {return fate;}
+    void setFate(State ft) {fate=ft;}
 };
 
 Person::Person()
 {
     days=0;
     health=HEALTHY;
+    fate=HEALTHY;
 }
 
 int Person::increaseDays2()
@@ -48,8 +53,8 @@ void Person::increaseDays()
         
         if(increaseDays2())
         {
-            if(DEATHRATE*100 >= randint(1,10000)) kill();
-            else recover();
+            if(fate==DEAD) kill();
+            else if(fate==RECOVERED) recover();
         }
     }
 }
@@ -59,6 +64,8 @@ void Person::infect()
     if(health==DEAD||health==RECOVERED) {std::cout<<std::endl<<"can't infect"; exit(0);}
     health=INFECTED;
     recoveryPeriod=round(randnormal(RECOVERY*1.0,RECOVERY_TOL*1.0));
+    if(DEATHRATE*100>=randint(1,10000)) fate=DEAD;
+    else fate=RECOVERED;
 }
 
 void Person::infect(Person &p)
@@ -68,6 +75,8 @@ void Person::infect(Person &p)
     {
         p.health=INFECTED;
         p.recoveryPeriod=round(randnormal(RECOVERY*1.0,RECOVERY_TOL*1.0));
+        if(DEATHRATE*100>=randint(1,10000)) fate=DEAD;
+        else fate=RECOVERED;
     }
 }
 
