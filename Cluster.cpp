@@ -192,12 +192,12 @@ public:
         {
             if(member[i].increaseDays2())
             {
-                if(outcome==DEAD)
+                if(outcome[i]==DEAD)
                 {
                     member[i].kill();
                     mourge.push_back(i);
                 }
-                else if(outcome==RECOVERED)
+                else if(outcome[i]==RECOVERED)
                 {
                     member[i].recover();
                 }
